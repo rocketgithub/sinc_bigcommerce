@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="sincronizacion_menu_contacts"
+        name="Sincronizacion"
+        action="contacts.action_contacts"
+        parent="contacts.menu_contacts"
+        sequence="5"/>
+
+        <record id="sinc_bigcommerce_cliente_por_id_wizard_view" model="ir.ui.view">
+            <field name="name">Sincronizacion</field>
+            <field name="model">sinc_bigcommerce.cliente_por_id.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Ingrese el ID del cliente de BigCommerce">
+                    <group>
+                        <group>
+                            <field name="cliente_id"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="sincronizar" string="Sincronizar" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="sinc_bigcommerce_cliente_por_id_action" model="ir.actions.act_window">
+            <field name="name">Cliente por ID</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sinc_bigcommerce.cliente_por_id.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    <menuitem id="sincronizacion_cliente_por_id"
+        name="Cliente por ID"
+        action="sinc_bigcommerce.sinc_bigcommerce_cliente_por_id_action"
+        parent="sinc_bigcommerce.sincronizacion_menu_contacts"
+        sequence="1"/>
+
+        <record id="sinc_bigcommerce_direcciones_por_cliente_id_wizard_view" model="ir.ui.view">
+            <field name="name">Sincronizacion</field>
+            <field name="model">sinc_bigcommerce.direcciones_por_cliente_id.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Ingrese el ID del cliente de BigCommerce">
+                    <group>
+                        <group>
+                            <field name="cliente_id"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="sincronizar" string="Sincronizar" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="sinc_bigcommerce_direcciones_por_cliente_id_action" model="ir.actions.act_window">
+            <field name="name">Direcciones por Cliente</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sinc_bigcommerce.direcciones_por_cliente_id.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    <menuitem id="sincronizacion_direcciones_por_cliente_id"
+        name="Direcciones por cliente"
+        action="sinc_bigcommerce.sinc_bigcommerce_direcciones_por_cliente_id_action"
+        parent="sinc_bigcommerce.sincronizacion_menu_contacts"
+        sequence="2"/>
+
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">sinc.res.config.settings.view.form.inherit.base.setup</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="100"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('settings')]" position="inside">
+                    <div class="app_settings_block" data-string="Sincronizacion" string="Sincronizacion" data-key="sinc">
+                        <div id="sincronizacion">
+                            <h2>Sincronizacion</h2>
+                        </div>
+                        <group name="sinc">
+                            <group>
+                                <field name="client_id"/>
+                                <field name="store_hash"/>
+                                <field name="access_token"/>
+<!--                                <field name="clientes_ultima_sincronizacion" readonly="1"/>-->
+                                <field name="partner_id"/>
+                            </group>
+                        </group>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+</odoo>
