@@ -6,21 +6,65 @@
             <field name="priority" eval="100"/>
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('settings')]" position="inside">
-                    <div class="app_settings_block" data-string="Sincronizacion" string="Sincronizacion" data-key="sinc">
+                <xpath expr="//div[@id='invite_users']" position="before">
                         <div id="sincronizacion">
-                            <h2>Sincronizacion</h2>
+                            <h2>Sincronizacion BigCommerce - Odoo</h2>
+
+                            <div class="row mt16 o_settings_container" name="bc_client_id">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <div class="text-muted">
+                                            Client ID para conexion con BigCommerce
+                                        </div>
+                                        <div class="text-muted">
+                                            <label for="client_id" string="Client ID" class="col-3 col-lg-3 o_light_label"/>
+                                            <field name="client_id" class="oe_inline" required="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <div class="text-muted">
+                                            Store hash para conexion con BigCommerce
+                                        </div>
+                                        <div class="text-muted">
+                                            <label for="store_hash" string="Store hash" class="col-3 col-lg-3 o_light_label"/>
+                                            <field name="store_hash" class="oe_inline" required="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <div class="text-muted">
+                                            Access token para conexion con BigCommerce
+                                        </div>
+                                        <div class="text-muted">
+                                            <label for="access_token" string="Access token" class="col-3 col-lg-3 o_light_label"/>
+                                            <field name="access_token" class="oe_inline" required="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <div class="text-muted">
+                                            Cliente predeterminado en Ordenes de venta
+                                        </div>
+                                        <div class="text-muted">
+                                            <label for="partner_id" string="Cliente" class="col-3 col-lg-3 o_light_label"/>
+                                            <field name="partner_id" class="oe_inline" required="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <group name="sinc">
-                            <group>
-                                <field name="client_id"/>
-                                <field name="store_hash"/>
-                                <field name="access_token"/>
-<!--                                <field name="clientes_ultima_sincronizacion" readonly="1"/>-->
-                                <field name="partner_id"/>
-                            </group>
-                        </group>
-                    </div>
                 </xpath>
             </field>
         </record>
