@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
@@ -10,7 +8,6 @@ class ResConfigSettings(models.TransientModel):
     client_id = fields.Char('client_id', default='7xgu6qz4km0vz35u7u4exbdjvc10ao7', config_parameter='sinc.client_id')
     store_hash = fields.Char('store_hash', default='l5lq9lg0om', config_parameter='sinc.store_hash')
     access_token = fields.Char('access_token', default='2y587aim2w6yo833f8j5azlqmxpv0nq', config_parameter='sinc.access_token')
-#    clientes_ultima_sincronizacion = fields.Char('Clientes ultima sincronizacion', default='2020-01-01', config_parameter='sinc.clientes_ultima_sincronizacion')
     partner_id = fields.Many2one('res.partner', string='Cliente', config_parameter='sinc.partner_id')
 
     def get_default_client_id(self, fields):

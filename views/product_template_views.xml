@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="sinc_bigcommerce_product_template_only_form_view" model="ir.ui.view">
+        <field name="name">sinc_bigcommerce.product.template.product.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="onlife.onlife_product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <field name="keywords" position="after">
+                <field name="sinc_id"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

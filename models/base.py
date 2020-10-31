@@ -10,11 +10,10 @@ class SincBase(models.AbstractModel):
     _name = 'sinc_bigcommerce.base'
 
     # Convierte el diccionario proveniente de BigCommerce en un diccionario para agregar o modificar en Odoo.
-    # Puede ser utilizado por cualquier modelo que herede de la clase sinc_bigcommerce.base.
+    # Puede ser utilizado por cualquiera de los modelos que hereda de la clase sinc_bigcommerce.base.
     # registro: diccionario de un registro obtenido de BigCommerce.
     # return: diccionario para agregar o modificar en formato Odoo.
     def _preparar_diccionario_odoo(self, registro):
-
         # Cada modelo de este módulo de sincronización que llama a este método (transferir_bc_odoo), 
         # debe tener definido un método llamado campos().
         campos = self.campos()
@@ -40,9 +39,6 @@ class SincBase(models.AbstractModel):
                     dict[campo[0]] = cadena
                 elif campo[1] == '=':
                     dict[campo[0]] = campo[2]
-#            elif isinstance(campo[1], list):
-#                obj = self.env[campo[1][1]].search([('sinc_id', '=', registro[campo[1][0]])])
-#                dict[campo[0]] = obj.id
             else:
                 dict[campo[0]] = registro[campo[1]]
         return dict
@@ -57,36 +53,24 @@ class SincBase(models.AbstractModel):
 
         return dict
 
-        
-    def _get_params(self, filtros):
-        if filtros == None or filtros == []:
-            return False
-
-        params = ''
-        for filtro in filtros:
-            for key in filtro.keys():
-                params += '&' + key + '=' + str(filtro[key])
-        return params
 
     # Transfiere información desde BigCommerce hacia Odoo. 
-    # Si el método es llamado sin el parámetro 'filtros', se obtienen todos los registros del modelo de BigCommerce.
-    # Si el método es llamado con el parámetro 'filtros', se asume que es un id de un modelo de BigCommerce, y se
-    # obtiene el registro específico para ese id.
+    # Si el método es llamado sin el parámetro 'params', se obtienen todos los registros del modelo de BigCommerce.
+    # Si el método es llamado con el parámetro 'params', se obtiene informacion filtrada.
     # Puede ser utilizado por cualquier modelo que herede de la clase sinc_bigcommerce.base.
-    # filtros: id del registro en BigCommerce
-    def transferir_bc_odoo(self, filtros = None):
-
-        # El API de BigCommerce V3 hace paginación, en bloques de 50 registros. 
-        # El ciclo while se ejecutará hasta que se hayan recorrido el total de páginas de la consulta.
-        seguir = True
+    # params: array de diccionarios. Ejemplo: transferir_bc_odoo([{'status_id': 9}])
+    def transferir_bc_odoo(self, params = []):
+        # El API de BigCommerce V3 hace paginación. El ciclo while se ejecutará hasta que se hayan recorrido el 
+        # total de páginas de la consulta.
+        params.insert(0, {'limit': self.env['sinc_bigcommerce.api'].get_limit()})
+        params.insert(0, {'page': None})
         pagina = 1
-        p = self._get_params(filtros)
+        contador = 0
+        seguir = True
         while seguir:
+            params[0]['page'] = pagina
             # Cada modelo de este módulo de sincronización que llama a este método (transferir_bc_odoo), 
-            # debe tener definido un método llamado obtener_bc_info().
-            params = 'page=' + str(pagina) + '&limit=' + str(self.env['sinc_bigcommerce.api'].get_limit())
-            if p:
-                params += p
+            # debe tener definido un método llamado obtener_bc_info().            
             registros_bc = self.obtener_bc_info(params)
             if registros_bc:
                 for registro in registros_bc['data']:
@@ -94,17 +78,13 @@ class SincBase(models.AbstractModel):
                     # Cada modelo de este módulo de sincronización que llama a este método (transferir_bc_odoo), 
                     # debe tener definido un método llamado res_model() y otro llamado filtro_odoo().
                     obj = self.env[self.res_model()].search(self.filtro_odoo(registro['id']))
+                    contador += 1
                     if not obj:
+                        logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Crear) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo')
                         obj = self.env[self._name].create_odoo(dict)
-                        if obj:
-                            logging.warn('Crear ' + self.res_model() + ': True')
-                        else:
-                            logging.warn('Crear ' + self.res_model() + ': False')
                     else:
-                        if self.env[self._name].write_odoo(dict):
-                            logging.warn('Modificar ' + self.res_model() + ': True')
-                        else:
-                            logging.warn('Modificar ' + self.res_model() + ': False')
+                        logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Modificar) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo ID: ' + str(obj.id))
+                        self.env[self._name].write_odoo(obj, dict)
 
                 if registros_bc['meta']['pagination']['current_page'] >= registros_bc['meta']['pagination']['total_pages']:
                     seguir = False
@@ -112,6 +92,10 @@ class SincBase(models.AbstractModel):
                     pagina += 1
             else:
                 seguir = False
+
+#            seguir = False
+#            if contador > 50:
+#                seguir = False
 
     # Prepara el diccionario para crear o modificar registros en BigCommerce.
     def _preparar_diccionario_bc(self, registro):
@@ -123,17 +107,20 @@ class SincBase(models.AbstractModel):
                     dict[campo[1]] = registro[campo[0]]
         return dict
 
-    # Crea o modifica un registro en BigCommerce.
-    def transferir_odoo_bc(self, filtros = None):
-        registros = self.obtener_odoo_info(filtros)
+    # Crea o modifica registros en BigCommerce.
+    def transferir_odoo_bc(self, params = []):
+        registros = self.obtener_odoo_info(params)
         if registros:
+            total = len(registros)
+            contador = 0
             for registro in registros:
+                contador += 1
                 dict = self._preparar_diccionario_bc(registro)
-                if not registro.sinc_id or registro.sinc_id == 0:
-                    bc_id = self.create_bc(dict)
-                    registro.sinc_id = bc_id
-                    logging.warn('Crear')
+                if registro.sinc_id == 0:
+                    logging.warn(str(contador) + '/' + str(total) + ' ' + self.res_model() + ' (Crear) Odoo ID: ' + str(registro.id) + ' --> BC')
+                    bc_id = self.create_bc(dict, registro)
+                    if bc_id:
+                        registro.sinc_id = bc_id
                 else:
-                    self.write_bc(dict, registro.sinc_id)
-                    logging.warn('Modificar')
-
+                    logging.warn(str(contador) + '/' + str(total) + ' ' + self.res_model() + ' (Modificar) Odoo ID: ' + str(registro.id) + ' --> BC ID: ' + str(registro.sinc_id))
+                    self.write_bc(dict, registro)
