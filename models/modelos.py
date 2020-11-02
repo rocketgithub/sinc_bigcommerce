@@ -307,9 +307,15 @@ class SincProduct(models.AbstractModel):
             imagen = base64.b64encode(requests.get(dict['image_1024']).content)
             del dict['image_1024']
 
+        campos = []
+        campos_personalizados = self.env['onlife.campo_personalizado'].search([])
+        for campo in campos_personalizados:
+            campos.append(campo.name)
+
         lineas = []
         for linea in dict['campo_personalizado_ids']:
-            lineas.append((0, 0, linea))
+            if linea['campo_personalizado_id'] in campos:
+                lineas.append((0, 0, linea))
         dict['campo_personalizado_ids'] = lineas
 
         producto = self.env[self.res_model()].create(dict)
@@ -319,8 +325,9 @@ class SincProduct(models.AbstractModel):
         return producto
 
     def write_odoo(self, producto, dict):
-        categoria = self._establecer_categoria(dict['categ_id'])
-        laboratorio = self._establecer_laboratorio(dict['laboratorio_id'])
+        categoria = self.env['sinc_bigcommerce.product_category'].establecer_categoria(dict['categ_id'])
+        laboratorio = self.env['sinc_bigcommerce.laboratorio'].establecer_laboratorio(dict['laboratorio_id'])
+
         if categoria:
             dict['categ_id'] = categoria.id
         else:
@@ -331,18 +338,29 @@ class SincProduct(models.AbstractModel):
         else:
             dict['laboratorio_id'] = None
 
-        producto.write(dict)
+        imagen = False
+        if dict['image_1024']:
+            imagen = base64.b64encode(requests.get(dict['image_1024']).content)
+            del dict['image_1024']
+
+        campos = []
+        campos_personalizados = self.env['onlife.campo_personalizado'].search([])
+        for campo in campos_personalizados:
+            campos.append(campo.name)
+
         lineas = []
         for campo_personalizado_id in producto.campo_personalizado_ids:
             lineas.append((2, campo_personalizado_id.id, False))
 
-        res = self.env['sinc_bigcommerce.api'].get_campos_personalizados(producto.sinc_id)
-        if res:
-            res = json.loads(res)
-            for r in res['data']:
-                dict_cf = {'product_id': producto.id, 'campo_personalizado_id': r['name'], 'value': r['value'], 'sinc_id': r['id']}
-                lineas.append((0, 0, dict_cf))
-        producto.campo_personalizado_ids = lineas            
+        for linea in dict['campo_personalizado_ids']:
+            if linea['campo_personalizado_id'] in campos:
+                lineas.append((0, 0, linea))
+        dict['campo_personalizado_ids'] = lineas
+
+        producto.write(dict)
+        
+        if imagen:
+            producto.product_tmpl_id.image_1920 = imagen
 
         return True
 
