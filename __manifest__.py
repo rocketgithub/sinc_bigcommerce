@@ -20,5 +20,6 @@
         'views/res_config_settings_views.xml',
         'views/product_template_views.xml',
         'wizard/sincronizacion_views.xml',
+        'security/ir.model.access.csv',
     ],
 }

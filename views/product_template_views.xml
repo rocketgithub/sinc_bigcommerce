@@ -1,15 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="sinc_bigcommerce_view_campo_personalizado_form" model="ir.ui.view">
+        <field name="name">sinc_bigcommerce.campo_personalizado.form</field>
+        <field name="model">sinc_bigcommerce.campo_personalizado</field>
+        <field name="arch" type="xml">
+            <form string="Campos personalizados">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sinc_bigcommerce_view_campo_personalizado_tree" model="ir.ui.view">
+        <field name="name">sinc_bigcommerce.campo_personalizado.tree</field>
+        <field name="model">sinc_bigcommerce.campo_personalizado</field>
+        <field name="arch" type="xml">
+           <tree string="Campos personalizados">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="act_sinc_bigcommerce_campo_personalizado_view" model="ir.actions.act_window">
+        <field name="name">Campos personalizados</field>
+        <field name="res_model">sinc_bigcommerce.campo_personalizado</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="sinc_bigcommerce_view_campo_personalizado_tree"/>
+    </record>
+
+    <menuitem
+        id="menu_act_sinc_bigcommerce_campo_personalizado"
+        name="Campos personalizados"
+        action="act_sinc_bigcommerce_campo_personalizado_view"
+        parent="sale.product_menu_catalog"
+        sequence="50"
+        />
+
+    <record id="sinc_bigcommerce_view_marca_form" model="ir.ui.view">
+        <field name="name">sinc_bigcommerce.marca.form</field>
+        <field name="model">sinc_bigcommerce.marca</field>
+        <field name="arch" type="xml">
+            <form string="Marcas">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sinc_bigcommerce_view_marca_tree" model="ir.ui.view">
+        <field name="name">sinc_bigcommerce.marca.tree</field>
+        <field name="model">sinc_bigcommerce.marca</field>
+        <field name="arch" type="xml">
+           <tree string="Marcas">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="act_sinc_bigcommerce_marca_view" model="ir.actions.act_window">
+        <field name="name">Marcas</field>
+        <field name="res_model">sinc_bigcommerce.marca</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="sinc_bigcommerce_view_marca_tree"/>
+    </record>
+
+    <menuitem
+        id="menu_act_sinc_bigcommerce_marca"
+        name="Marcas"
+        action="act_sinc_bigcommerce_marca_view"
+        parent="sale.product_menu_catalog"
+        sequence="51"
+        />
 
     <record id="sinc_bigcommerce_product_template_only_form_view" model="ir.ui.view">
         <field name="name">sinc_bigcommerce.product.template.product.form</field>
         <field name="model">product.template</field>
-        <field name="inherit_id" ref="onlife.onlife_product_template_only_form_view"/>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <field name="keywords" position="after">
+            <field name="barcode" position="after">
+                <field name="marca_id"/>
+                <field name="keywords"/>
                 <field name="sinc_id"/>
             </field>
+            <notebook position="inside">
+                <page string="Campos personalizados">
+                    <group>
+                        <field name="campo_personalizado_ids" nolabel="1">
+                            <tree string="Campos personalizados" editable="bottom">
+                                <field name="campo_personalizado_id"/>
+                                <field name="value"/>
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+            </notebook>
         </field>
     </record>
 

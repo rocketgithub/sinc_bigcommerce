@@ -167,12 +167,12 @@ class SincProductCategory(models.AbstractModel):
         return categoria
 
         
-class SincLaboratorio(models.AbstractModel):
-    _name = 'sinc_bigcommerce.laboratorio'
+class SincMarca(models.AbstractModel):
+    _name = 'sinc_bigcommerce.brand'
     _inherit = 'sinc_bigcommerce.base'
 
     def res_model(self):
-        return 'onlife.laboratorio'
+        return 'sinc_bigcommerce.marca'
 
     def campos(self):
         res = {}
@@ -211,15 +211,15 @@ class SincLaboratorio(models.AbstractModel):
         dict = json.dumps(dict)
         return self.env['sinc_bigcommerce.api'].put_brand(dict, registro.sinc_id)
 
-    def establecer_laboratorio(self, brand_id):
+    def establecer_marca(self, brand_id):
         if brand_id == 0:
             return False
-        laboratorio = self.env['onlife.laboratorio'].search(self.env['sinc_bigcommerce.laboratorio'].filtro_odoo(brand_id))
-        if not laboratorio:
+        marca = self.env['sinc_bigcommerce.marca'].search(self.env['sinc_bigcommerce.brand'].filtro_odoo(brand_id))
+        if not marca:
             params = [{'id': brand_id}]
-            self.env['sinc_bigcommerce.laboratorio'].transferir_bc_odoo(params)
-            laboratorio = self.env['onlife.laboratorio'].search(self.env['sinc_bigcommerce.laboratorio'].filtro_odoo(brand_id))
-        return laboratorio
+            self.env['sinc_bigcommerce.brand'].transferir_bc_odoo(params)
+            marca = self.env['sinc_bigcommerce.marca'].search(self.env['sinc_bigcommerce.brand'].filtro_odoo(brand_id))
+        return marca
 
 class SincProduct(models.AbstractModel):
     _name = 'sinc_bigcommerce.product'
@@ -237,7 +237,7 @@ class SincProduct(models.AbstractModel):
             ['weight', 'weight'],
             ['list_price', 'price'],
             ['default_code', 'sku'],
-            ['laboratorio_id', 'brand_id'],
+            ['marca_id', 'brand_id'],
             ['description', 'description'],
             ['keywords', 'search_keywords'],
             ['sale_ok', 'availability'],
@@ -290,17 +290,17 @@ class SincProduct(models.AbstractModel):
 
     def create_odoo(self, dict):
         categoria = self.env['sinc_bigcommerce.product_category'].establecer_categoria(dict['categ_id'])
-        laboratorio = self.env['sinc_bigcommerce.laboratorio'].establecer_laboratorio(dict['laboratorio_id'])
+        marca = self.env['sinc_bigcommerce.brand'].establecer_marca(dict['marca_id'])
 
         if categoria:
             dict['categ_id'] = categoria.id
         else:
             dict['categ_id'] = None
 
-        if laboratorio:
-            dict['laboratorio_id'] = laboratorio.id
+        if marca:
+            dict['marca_id'] = marca.id
         else:
-            dict['laboratorio_id'] = None
+            dict['marca_id'] = None
              
         imagen = False
         if dict['image_1024']:
@@ -308,7 +308,7 @@ class SincProduct(models.AbstractModel):
             del dict['image_1024']
 
         campos = []
-        campos_personalizados = self.env['onlife.campo_personalizado'].search([])
+        campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
         for campo in campos_personalizados:
             campos.append(campo.name)
 
@@ -326,17 +326,17 @@ class SincProduct(models.AbstractModel):
 
     def write_odoo(self, producto, dict):
         categoria = self.env['sinc_bigcommerce.product_category'].establecer_categoria(dict['categ_id'])
-        laboratorio = self.env['sinc_bigcommerce.laboratorio'].establecer_laboratorio(dict['laboratorio_id'])
+        marca = self.env['sinc_bigcommerce.brand'].establecer_marca(dict['marca_id'])
 
         if categoria:
             dict['categ_id'] = categoria.id
         else:
             dict['categ_id'] = None
 
-        if laboratorio:
-            dict['laboratorio_id'] = laboratorio.id
+        if marca:
+            dict['marca_id'] = marca.id
         else:
-            dict['laboratorio_id'] = None
+            dict['marca_id'] = None
 
         imagen = False
         if dict['image_1024']:
@@ -344,7 +344,7 @@ class SincProduct(models.AbstractModel):
             del dict['image_1024']
 
         campos = []
-        campos_personalizados = self.env['onlife.campo_personalizado'].search([])
+        campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
         for campo in campos_personalizados:
             campos.append(campo.name)
 
@@ -468,7 +468,7 @@ class SincProduct(models.AbstractModel):
 
     def transferir_odoo_bc(self, filtros = []):
 #        self.env['sinc_bigcommerce.product_category'].transferir_odoo_bc([])
-#        self.env['sinc_bigcommerce.laboratorio'].transferir_odoo_bc([])
+#        self.env['sinc_bigcommerce.brand'].transferir_odoo_bc([])
         super(SincProduct, self).transferir_odoo_bc(filtros)
 
     def establecer_producto(self, product_id):
