@@ -9,8 +9,9 @@ import logging
 class SincBase(models.AbstractModel):
     _name = 'sinc_bigcommerce.base'
 
+    #El primer bloque de métodos de este modelo corresponden a la sincronización BC --> Odoo
+    
     # Convierte el diccionario proveniente de BigCommerce en un diccionario para agregar o modificar en Odoo.
-    # Puede ser utilizado por cualquiera de los modelos que hereda de la clase sinc_bigcommerce.base.
     # registro: diccionario de un registro obtenido de BigCommerce.
     # return: diccionario para agregar o modificar en formato Odoo.
     def _preparar_diccionario_odoo(self, registro):
@@ -28,6 +29,7 @@ class SincBase(models.AbstractModel):
 
         return dict
 
+    # Crea el diccionario de todos los campos que no son One2many.
     def _preparar_campos_clasicos(self, registro, campos):
         dict = {}
         for campo in campos:
@@ -43,6 +45,7 @@ class SincBase(models.AbstractModel):
                 dict[campo[0]] = registro[campo[1]]
         return dict
 
+    # Crea el diccionario de los campos que son One2many.
     def _preparar_campos_o2m(self, registro, campos):
         dict = {}
         for campo in campos:
@@ -53,19 +56,29 @@ class SincBase(models.AbstractModel):
 
         return dict
 
+    def establecer_registro_odoo(self, params):
+        if 'id' in params[0]:
+            id = params[0]['id']
+        else:
+            id = params[0]['id:in']
+
+        if id == 0:
+            return False
+        res = self.env[self.res_model()].search(self.filtro_odoo(id))
+        if not res:
+            self.transferir_bc_odoo(params)
+            res = self.env[self.res_model()].search(self.filtro_odoo(id))
+        return res
 
     # Transfiere información desde BigCommerce hacia Odoo. 
-    # Si el método es llamado sin el parámetro 'params', se obtienen todos los registros del modelo de BigCommerce.
-    # Si el método es llamado con el parámetro 'params', se obtiene informacion filtrada.
-    # Puede ser utilizado por cualquier modelo que herede de la clase sinc_bigcommerce.base.
-    # params: array de diccionarios. Ejemplo: transferir_bc_odoo([{'status_id': 9}])
+    # params: array de diccionarios para filtrar la búsqueda. Ejemplo: transferir_bc_odoo([{'status_id': 9}])
     def transferir_bc_odoo(self, params = []):
         # El API de BigCommerce V3 hace paginación. El ciclo while se ejecutará hasta que se hayan recorrido el 
         # total de páginas de la consulta.
         params.insert(0, {'limit': self.env['sinc_bigcommerce.api'].get_limit()})
         params.insert(0, {'page': None})
-        pagina = 1
-        contador = 0
+        pagina = 1 #Variable que lleva el control de las páginas.
+        contador = 0 #Variable utilizada para desplegar información en el log.
         seguir = True
         while seguir:
             params[0]['page'] = pagina
@@ -86,6 +99,8 @@ class SincBase(models.AbstractModel):
                         logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Modificar) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo ID: ' + str(obj.id))
                         self.env[self._name].write_odoo(obj, dict)
 
+                # Condición que revisa si termina el ciclo o si se hace una nueva llamada al api de bigcommerce para accesar 
+                # la siguiente página de información.
                 if registros_bc['meta']['pagination']['current_page'] >= registros_bc['meta']['pagination']['total_pages']:
                     seguir = False
                 else:
@@ -93,11 +108,12 @@ class SincBase(models.AbstractModel):
             else:
                 seguir = False
 
-#            seguir = False
 #            if contador > 50:
 #                seguir = False
 
-    # Prepara el diccionario para crear o modificar registros en BigCommerce.
+    #El segundo bloque de métodos de este modelo corresponden a la sincronización Odoo --> BC
+
+    # Obtiene un objeto de Odoo y devuelve el diccionario para crear o modificar registros en BigCommerce.
     def _preparar_diccionario_bc(self, registro):
         dict = {}
         campos = self.campos()

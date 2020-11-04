@@ -20,6 +20,7 @@ class SincBigCommerceApi(models.AbstractModel):
     def get_limit(self):
         return 250
 
+    # Convierte parametros de Array a string para ser utilizados en url.
     def _get_params(self, params):
         res = ''
         x = 0
@@ -51,10 +52,7 @@ class SincBigCommerceApi(models.AbstractModel):
 
     # Obtiene las categorias de productos de BigCommerce. 
     def get_product_categories(self, params):
-        if len(params) < 3:
-            url = self._url_base_v3() + '/catalog/categories?' + self._get_params(params)
-        elif len(params) == 3 and params[2]['category_id']:
-            url = self._url_base_v3() + '/catalog/categories/' + str(params[2]['category_id'])
+        url = self._url_base_v3() + '/catalog/categories?' + self._get_params(params)
         return self.env['sinc_bigcommerce.requests'].get(url)
 
     # Crea una categoria de producto en BigCommerce. 
@@ -92,19 +90,19 @@ class SincBigCommerceApi(models.AbstractModel):
     #PRODUCT IMAGES -----------------------------------------------------------
 
     # Obtiene los productos de BigCommerce. 
-    def get_product_images(self, product_id):
-        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images'
-        return self.env['sinc_bigcommerce.requests'].get(url)
+#    def get_product_images(self, product_id):
+#        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images'
+#        return self.env['sinc_bigcommerce.requests'].get(url)
 
     # Crea una imagen en el producto de BigCommerce. 
-    def post_product_image(self, product_id, dict):
-        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images'
-        return self.env['sinc_bigcommerce.requests'].post(url, dict)    
+#    def post_product_image(self, product_id, dict):
+#        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images'
+#        return self.env['sinc_bigcommerce.requests'].post(url, dict)    
 
     # Borra una imagen del producto en BigCommerce. 
-    def delete_product_image(self, product_id, image_id):
-        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images/' + str(image_id)
-        return self.env['sinc_bigcommerce.requests'].delete(url)
+#    def delete_product_image(self, product_id, image_id):
+#        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images/' + str(image_id)
+#        return self.env['sinc_bigcommerce.requests'].delete(url)
 
     #PRODUCT CUSTOM FIELDS ----------------------------------------------------
 
@@ -132,10 +130,7 @@ class SincBigCommerceApi(models.AbstractModel):
 
     # Obtiene las marcas de BigCommerce. 
     def get_brands(self, params):
-        if len(params) < 3:
-            url = self._url_base_v3() + '/catalog/brands?' + self._get_params(params)
-        elif len(params) == 3 and params[2]['brand_id']:
-            url = self._url_base_v3() + '/catalog/brands/' + str(params[2]['brand_id'])
+        url = self._url_base_v3() + '/catalog/brands?' + self._get_params(params)
         return self.env['sinc_bigcommerce.requests'].get(url)
 
     # Crea una marca en BigCommerce. 

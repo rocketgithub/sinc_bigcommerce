@@ -35,7 +35,7 @@ class SincRequests(models.AbstractModel):
 
     def _requests_monitor(self, headers):
 #        logging.warn('Requests: ' + headers['X-Rate-Limit-Requests-Left'] + ' --> ' + headers['X-Rate-Limit-Requests-Quota'] + ' --- Time: ' + headers['X-Rate-Limit-Time-Reset-Ms'] + ' --> ' + headers['X-Rate-Limit-Time-Window-Ms'])
-        if (int(headers['X-Rate-Limit-Requests-Left']) / int(headers['X-Rate-Limit-Requests-Quota'])) < 0.05:
+        if (int(headers['X-Rate-Limit-Requests-Left']) / int(headers['X-Rate-Limit-Requests-Quota'])) < 0.30:
             pausa = math.ceil(int(headers['X-Rate-Limit-Time-Reset-Ms']) / 1000) + 1
             logging.getLogger('BigCommerce Limit-Requests. Pausa en sincronizacion por').warn(str(pausa) + ' segundos')
             time.sleep(pausa)
