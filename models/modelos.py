@@ -54,15 +54,11 @@ class SincResPartner(models.AbstractModel):
 
     # Modifica un registro en Odoo
     def write_odoo(self, obj, dict):
-        return obj.write(dict)
+        return obj.write(dict)    
 
     def establecer_cliente(self, partner_id):
-        cliente = self.env[self.res_model()].search(self.filtro_odoo(partner_id))
-        if not cliente:
-            params = [{'id:in': partner_id}]
-            self.transferir_bc_odoo(params)
-            cliente = self.env[self.res_model()].search(self.filtro_odoo(partner_id))
-        return cliente
+        params = [{'id:in': partner_id}]
+        return self.establecer_registro_odoo(params)
 
 class SincResPartnerAddress(models.AbstractModel):
     _name = 'sinc_bigcommerce.res_partner_address'
@@ -157,16 +153,9 @@ class SincProductCategory(models.AbstractModel):
         return self.env['sinc_bigcommerce.api'].put_product_category(dict, registro.sinc_id)
 
     def establecer_categoria(self, categ_id):
-        if categ_id == 0:
-            return False
-        categoria = self.env['product.category'].search(self.env['sinc_bigcommerce.product_category'].filtro_odoo(categ_id))
-        if not categoria:
-            params = [{'id': categ_id}]
-            self.env['sinc_bigcommerce.product_category'].transferir_bc_odoo(params)
-            categoria = self.env['product.category'].search(self.env['sinc_bigcommerce.product_category'].filtro_odoo(categ_id))
-        return categoria
+        params = [{'id': categ_id}]
+        return self.establecer_registro_odoo(params)
 
-        
 class SincMarca(models.AbstractModel):
     _name = 'sinc_bigcommerce.brand'
     _inherit = 'sinc_bigcommerce.base'
@@ -207,19 +196,12 @@ class SincMarca(models.AbstractModel):
         return self.env['sinc_bigcommerce.api'].post_brand(dict)
 
     def write_bc(self, dict, registro):
-#        dict['meta_description'] = ''
         dict = json.dumps(dict)
         return self.env['sinc_bigcommerce.api'].put_brand(dict, registro.sinc_id)
 
     def establecer_marca(self, brand_id):
-        if brand_id == 0:
-            return False
-        marca = self.env['sinc_bigcommerce.marca'].search(self.env['sinc_bigcommerce.brand'].filtro_odoo(brand_id))
-        if not marca:
-            params = [{'id': brand_id}]
-            self.env['sinc_bigcommerce.brand'].transferir_bc_odoo(params)
-            marca = self.env['sinc_bigcommerce.marca'].search(self.env['sinc_bigcommerce.brand'].filtro_odoo(brand_id))
-        return marca
+        params = [{'id': brand_id}]
+        return self.establecer_registro_odoo(params)
 
 class SincProduct(models.AbstractModel):
     _name = 'sinc_bigcommerce.product'
@@ -242,7 +224,7 @@ class SincProduct(models.AbstractModel):
             ['keywords', 'search_keywords'],
             ['sale_ok', 'availability'],
             ['sale_ok', 'is_visible'],
-            ['image_1024', 'url_standard'],            
+            ['image_1920', 'url_standard'],            
             ['sinc_id', 'id'],
         ]
         res['o2m'] = [
@@ -303,9 +285,9 @@ class SincProduct(models.AbstractModel):
             dict['marca_id'] = None
              
         imagen = False
-        if dict['image_1024']:
-            imagen = base64.b64encode(requests.get(dict['image_1024']).content)
-            del dict['image_1024']
+        if dict['image_1920']:
+            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
+            del dict['image_1920']
 
         campos = []
         campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
@@ -339,9 +321,9 @@ class SincProduct(models.AbstractModel):
             dict['marca_id'] = None
 
         imagen = False
-        if dict['image_1024']:
-            imagen = base64.b64encode(requests.get(dict['image_1024']).content)
-            del dict['image_1024']
+        if dict['image_1920']:
+            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
+            del dict['image_1920']
 
         campos = []
         campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
@@ -395,7 +377,7 @@ class SincProduct(models.AbstractModel):
         if not dict['search_keywords']:
             del dict['search_keywords']
 
-        image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1024'
+        image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1920'
         dict['images'] = [{"image_url": image_url, "is_thumbnail": True}]
 
         campos_personalizados = []
@@ -443,7 +425,7 @@ class SincProduct(models.AbstractModel):
         if not dict['search_keywords']:
             del dict['search_keywords']
 
-        image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1024'
+        image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1920'
         dict['images'] = [{"image_url": image_url, "is_thumbnail": True}]
 
         res = self.env['sinc_bigcommerce.api'].get_custom_fields(producto.sinc_id)
@@ -472,12 +454,8 @@ class SincProduct(models.AbstractModel):
         super(SincProduct, self).transferir_odoo_bc(filtros)
 
     def establecer_producto(self, product_id):
-        producto = self.env['product.product'].search(self.env['sinc_bigcommerce.product'].filtro_odoo(product_id))
-        if not producto:
-            params = [{'id': product_id}]
-            self.env['sinc_bigcommerce.product'].transferir_bc_odoo(params)
-            producto = self.env['product.product'].search(self.env['sinc_bigcommerce.product'].filtro_odoo(product_id))
-        return producto
+        params = [{'id': product_id}]
+        return self.establecer_registro_odoo(params)
 
 class SincOrders(models.AbstractModel):
     _name = 'sinc_bigcommerce.sale'
@@ -506,12 +484,17 @@ class SincOrders(models.AbstractModel):
 
     def obtener_bc_info(self, params):
         if len(params) == 3 and 'order_id' in params[2]:
-            res = self.env['sinc_bigcommerce.api'].get_order(params[2]['order_id'])
+            order_id = params[2]['order_id']
+            res = self.env['sinc_bigcommerce.api'].get_order(order_id)
+            if res:
+                res = [json.loads(res)]
         else:
+            order_id = False
             res = self.env['sinc_bigcommerce.api'].get_orders(params)
+            if res:
+                res = json.loads(res)
 
         if res:
-            res = json.loads(res)
             for i, r in enumerate(res):
                 res[i]['street_1'] = r['billing_address']['street_1']
                 lines = json.loads(self.env['sinc_bigcommerce.api'].get_order_products(r['id']))
@@ -522,10 +505,14 @@ class SincOrders(models.AbstractModel):
             result['meta']['pagination'] = {}
             result['meta']['pagination']['total'] = len(res)
             result['meta']['pagination']['current_page'] = 1
-            result['meta']['pagination']['total_pages'] = result['meta']['pagination']['current_page'] + 1
+            if order_id:
+                result['meta']['pagination']['total_pages'] = result['meta']['pagination']['current_page'] - 1
+            else:
+                result['meta']['pagination']['total_pages'] = result['meta']['pagination']['current_page'] + 1
             return result
         else:
             return False
+
 
     def create_odoo(self, dict):
         if dict['partner_id'] == 0:
@@ -573,6 +560,7 @@ class SincOrders(models.AbstractModel):
                 venta.action_confirm()
                 venta._create_invoices()
                 for factura in venta.invoice_ids:
+                    factura.journal_id = 13
                     factura.action_post()
             else:
                 for n in nota:
