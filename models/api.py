@@ -100,9 +100,9 @@ class SincBigCommerceApi(models.AbstractModel):
 #        return self.env['sinc_bigcommerce.requests'].post(url, dict)    
 
     # Borra una imagen del producto en BigCommerce. 
-#    def delete_product_image(self, product_id, image_id):
-#        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images/' + str(image_id)
-#        return self.env['sinc_bigcommerce.requests'].delete(url)
+    def delete_product_image(self, product_id, image_id):
+        url = self._url_base_v3() + '/catalog/products/' + str(product_id) + '/images/' + str(image_id)
+        return self.env['sinc_bigcommerce.requests'].delete(url)
 
     #PRODUCT CUSTOM FIELDS ----------------------------------------------------
 
