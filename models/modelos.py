@@ -394,59 +394,63 @@ class SincProduct(models.AbstractModel):
         
         return bc_id
 
-    def write_bc(self, dict, producto):        
-        if dict['category_id']:
-            dict['categories'] = [dict['category_id'].sinc_id]
-        else:
-            dict['categories'] = []
-        del dict['category_id']
-
-        if dict['brand_id']:
-            dict['brand_id'] = dict['brand_id'].sinc_id
-        else:
-            del dict['brand_id']
-
-        if dict['type'] == 'product':
-            dict['type'] = 'physical'
-        else:
-            dict['type'] = 'digital'
-
-        if dict['availability']:
-            dict['availability'] = 'available'
-        else:
-            dict['availability'] = 'disabled'
-
-        if not dict['description']:
-            del dict['description']
-
-        if not dict['sku']:
-            del dict['sku']
-
-        if not dict['search_keywords']:
-            del dict['search_keywords']
-
-        image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1920'
-        dict['images'] = [{"image_url": image_url, "is_thumbnail": True}]
-
-        res = self.env['sinc_bigcommerce.api'].get_custom_fields(producto.sinc_id)
+    def write_bc(self, dict, producto):
+        res = self.env['sinc_bigcommerce.product'].obtener_bc_info([{'id': producto.sinc_id}])
         if res:
-            res = json.loads(res)
-            for r in res['data']:
+            if dict['category_id']:
+                dict['categories'] = [dict['category_id'].sinc_id]
+            else:
+                dict['categories'] = []
+            del dict['category_id']
+
+            if dict['brand_id']:
+                dict['brand_id'] = dict['brand_id'].sinc_id
+            else:
+                del dict['brand_id']
+
+            if dict['type'] == 'product':
+                dict['type'] = 'physical'
+            else:
+                dict['type'] = 'digital'
+
+            if dict['availability']:
+                dict['availability'] = 'available'
+            else:
+                dict['availability'] = 'disabled'
+
+            if not dict['description']:
+                del dict['description']
+
+            if not dict['sku']:
+                del dict['sku']
+
+            if not dict['search_keywords']:
+                del dict['search_keywords']
+
+            if 'url_standard' in dict:
+                del dict['url_standard']
+
+            campos_personalizados = []
+            if producto.campo_personalizado_ids:
+                for campo_personalizado in producto.campo_personalizado_ids:
+                    campos_personalizados.append({'name': campo_personalizado.campo_personalizado_id, 'value': campo_personalizado.value})
+            dict['custom_fields'] = campos_personalizados
+
+            image_url = self.env["ir.config_parameter"].get_param("web.base.url", default=None) + '/web/image/product.product/' + str(producto.id) + '/image_1920'
+            dict['images'] = [{"image_url": image_url, "is_thumbnail": True}]
+
+            for r in res['data'][0]['custom_fields']:
                 self.env['sinc_bigcommerce.api'].delete_custom_field(producto.sinc_id, r['id'])
 
-        campos_personalizados = []
-        if producto.campo_personalizado_ids:
-            for campo_personalizado in producto.campo_personalizado_ids:
-                campos_personalizados.append({'name': campo_personalizado.campo_personalizado_id, 'value': campo_personalizado.value})
-        dict['custom_fields'] = campos_personalizados
+            for r in res['data'][0]['images']:
+                self.env['sinc_bigcommerce.api'].delete_product_image(producto.sinc_id, r['id'])
 
-        if 'url_standard' in dict:
-            del dict['url_standard']
+            dict = json.dumps(dict)
+            bc_id = self.env['sinc_bigcommerce.api'].put_product(dict, producto.sinc_id) 
 
-        dict = json.dumps(dict)
-        bc_id = self.env['sinc_bigcommerce.api'].put_product(dict, producto.sinc_id) 
-
-        return bc_id
+            return bc_id
+        else:
+            return False
 
     def transferir_odoo_bc(self, filtros = []):
 #        self.env['sinc_bigcommerce.product_category'].transferir_odoo_bc([])
@@ -535,8 +539,8 @@ class SincOrders(models.AbstractModel):
             contacto = self.env['sinc_bigcommerce.res_partner_address'].obtener_odoo_info([('parent_id', '=', cliente.id), ('street', '=', dict['street'])])
             del dict['street']
             if contacto:
-                dict['partner_id'] = contacto.id
-                dict['partner_shipping_id'] = contacto.id
+                dict['partner_id'] = contacto[0].id
+                dict['partner_shipping_id'] = contacto[0].id
             else:
                 dict['partner_id'] = cliente.id
                 dict['partner_shipping_id'] = cliente.id
