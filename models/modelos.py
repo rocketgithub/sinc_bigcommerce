@@ -142,15 +142,22 @@ class SincProductCategory(models.AbstractModel):
     def write_odoo(self, obj, dict):
         return obj.write(dict)
 
-    def create_bc(self, dict, registro):
+    def create_bc(self, dict, categoria):
         dict['parent_id'] = 0
         dict = json.dumps(dict)
         return self.env['sinc_bigcommerce.api'].post_product_category(dict)
 
-    def write_bc(self, dict, registro):        
-        dict['parent_id'] = 0
-        dict = json.dumps(dict)
-        return self.env['sinc_bigcommerce.api'].put_product_category(dict, registro.sinc_id)
+    def write_bc(self, dict, categoria):        
+        res = self.obtener_bc_info([{'id': categoria.sinc_id}])
+        if res['data'] != []:
+            dict['parent_id'] = 0
+            dict = json.dumps(dict)
+            return self.env['sinc_bigcommerce.api'].put_product_category(dict, categoria.sinc_id)
+        else:
+            bc_id = self.create_bc(dict, categoria)
+            if bc_id:
+                categoria.sinc_id = bc_id
+            return bc_id
 
     def establecer_categoria(self, categ_id):
         params = [{'id': categ_id}]
@@ -191,13 +198,21 @@ class SincMarca(models.AbstractModel):
     def write_odoo(self, obj, dict):
         return obj.write(dict)
 
-    def create_bc(self, dict, registro):
+    def create_bc(self, dict, marca):
         dict = json.dumps(dict)
         return self.env['sinc_bigcommerce.api'].post_brand(dict)
 
-    def write_bc(self, dict, registro):
-        dict = json.dumps(dict)
-        return self.env['sinc_bigcommerce.api'].put_brand(dict, registro.sinc_id)
+    def write_bc(self, dict, marca):
+        res = self.obtener_bc_info([{'id': marca.sinc_id}])
+        if res['data'] != []:
+            dict['meta_description'] = ''
+            dict = json.dumps(dict)
+            return self.env['sinc_bigcommerce.api'].put_brand(dict, marca.sinc_id)
+        else:
+            bc_id = self.create_bc(dict, marca)
+            if bc_id:
+                marca.sinc_id = bc_id
+            return bc_id
 
     def establecer_marca(self, brand_id):
         params = [{'id': brand_id}]
@@ -395,8 +410,8 @@ class SincProduct(models.AbstractModel):
         return bc_id
 
     def write_bc(self, dict, producto):
-        res = self.env['sinc_bigcommerce.product'].obtener_bc_info([{'id': producto.sinc_id}])
-        if res:
+        res = self.obtener_bc_info([{'id': producto.sinc_id}])
+        if res['data'] != []:
             if dict['category_id']:
                 dict['categories'] = [dict['category_id'].sinc_id]
             else:
@@ -446,11 +461,12 @@ class SincProduct(models.AbstractModel):
                 self.env['sinc_bigcommerce.api'].delete_product_image(producto.sinc_id, r['id'])
 
             dict = json.dumps(dict)
-            bc_id = self.env['sinc_bigcommerce.api'].put_product(dict, producto.sinc_id) 
-
-            return bc_id
+            return self.env['sinc_bigcommerce.api'].put_product(dict, producto.sinc_id) 
         else:
-            return False
+            bc_id = self.create_bc(dict, producto)
+            if bc_id:
+                producto.sinc_id = bc_id
+            return bc_id
 
     def transferir_odoo_bc(self, filtros = []):
 #        self.env['sinc_bigcommerce.product_category'].transferir_odoo_bc([])
