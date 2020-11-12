@@ -6,13 +6,13 @@ import logging
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
-    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False, readonly=True)
+    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False)
     
 class Marca(models.Model):
     _name = "sinc_bigcommerce.marca"
 
     name = fields.Char('Nombre', required=True)
-    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False, readonly=True)
+    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False)
 
     _sql_constraints = [
         ('code_value_uniq', 'unique (name)', 'El nombre de la marca debe ser único !')
@@ -37,7 +37,7 @@ class ProductoCampoPersonalizado(models.Model):
     product_id = fields.Many2one('product.template', string='Producto', required=True, ondelete='cascade', index=True, copy=False)
     campo_personalizado_id = fields.Selection(selection=_campos_personalizados, string='Campo personalizado', required=True, store=True)
     value = fields.Char('Valor', required=True)
-    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False, readonly=True)
+    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False)
 
     _sql_constraints = [
         ('code_value_uniq', 'unique (campo_personalizado_id, product_id)', 'El campo personalizado debe ser único por producto !')
@@ -49,4 +49,4 @@ class ProductTemplate(models.Model):
     marca_id = fields.Many2one('sinc_bigcommerce.marca', 'Marca')
     keywords = fields.Char('Search keywords')
     campo_personalizado_ids = fields.One2many('sinc_bigcommerce.producto_campo_personalizado', 'product_id', 'Campo personalizado')
-    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False, readonly=True)
+    sinc_id = fields.Integer(string='BigCommerce ID', default=0, copy=False)
