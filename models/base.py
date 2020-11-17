@@ -36,7 +36,7 @@ class SincBase(models.AbstractModel):
             if len(campo) > 2:
                 if campo[1] == ' ':
                     cadena = registro[campo[2]]
-                    for x in xrange(3, len(campo)):
+                    for x in range(3, len(campo)):
                         cadena += campo[1] + registro[campo[x]]
                     dict[campo[0]] = cadena
                 elif campo[1] == '=':
