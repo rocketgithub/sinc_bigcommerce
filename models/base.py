@@ -72,12 +72,17 @@ class SincBase(models.AbstractModel):
 
     # Transfiere información desde BigCommerce hacia Odoo. 
     # params: array de diccionarios para filtrar la búsqueda. Ejemplo: transferir_bc_odoo([{'status_id': 9}])
-    def transferir_bc_odoo(self, params = []):
+    def transferir_bc_odoo(self, params = [], pagina_inicio = 0, cantidad_paginas = 0):
         # El API de BigCommerce V3 hace paginación. El ciclo while se ejecutará hasta que se hayan recorrido el 
         # total de páginas de la consulta.
         params.insert(0, {'limit': self.env['sinc_bigcommerce.api'].get_limit()})
         params.insert(0, {'page': None})
-        pagina = 1 #Variable que lleva el control de las páginas.
+
+        if pagina_inicio > 0:
+            pagina = pagina_inicio #Variable que lleva el control de las páginas.        
+        else:
+            pagina = 1 #Variable que lleva el control de las páginas.
+
         contador = 0 #Variable utilizada para desplegar información en el log.
         seguir = True
         while seguir:
@@ -105,6 +110,10 @@ class SincBase(models.AbstractModel):
                     seguir = False
                 else:
                     pagina += 1
+
+                if pagina_inicio > 0 and cantidad_paginas > 0 and pagina_inicio + cantidad_paginas <= pagina:
+                    seguir = False
+
             else:
                 seguir = False
 
