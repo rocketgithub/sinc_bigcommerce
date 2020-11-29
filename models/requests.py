@@ -56,7 +56,7 @@ class SincRequests(models.AbstractModel):
             self._requests_monitor(response.headers)
             return res['data']['id']
         else:
-            logging.warn('ERROR requests.put: ' + response.json()['title'])
+            logging.warn('ERROR requests.post: ' + str(response.json()))
             logging.getLogger('data').warn(data)
             return False
 
@@ -67,7 +67,7 @@ class SincRequests(models.AbstractModel):
             self._requests_monitor(response.headers)
             return res['data']['id']
         else:
-            logging.warn('ERROR requests.put: ' + response.json()['title'])
+            logging.warn('ERROR requests.put: ' + str(response.json()))
             logging.getLogger('data').warn(data)
             return False
 
