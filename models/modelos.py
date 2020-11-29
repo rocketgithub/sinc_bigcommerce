@@ -232,7 +232,7 @@ class SincProduct(models.AbstractModel):
             ['categ_id', 'category_id'],
             ['type', 'type'],
             ['weight', 'weight'],
-            ['list_price', 'price'],
+            ['list_price', 'sale_price'],
             ['default_code', 'sku'],
             ['marca_id', 'brand_id'],
             ['description', 'description'],
