@@ -36,7 +36,7 @@ class SincResPartner(models.AbstractModel):
     # Retorna el filtro de Odoo que será utilizado en búsquedas que determinan si un registro de BigCommerce ya existe en Odoo.
     # sinc_id es el campo en Odoo que relaciona al registro de Odoo con el id del registro en BigCommerce.
     def filtro_odoo(self, id):
-        return [('sinc_id', '=', id), ('type', '=', 'contact')]
+        return [('sinc_id', '=', id), ('type', '=', 'contact'), '|', ('active','=',True), ('active','=',False)]
 
     # En este método se define la llamada al método correspondiente del modelo 'sinc_bigcommerce.api'.
     # En este caso se llama al método get_customers de 'sinc_bigcommerce.api' por ser este modelo el relacionado a los Clientes.
@@ -84,7 +84,7 @@ class SincResPartnerAddress(models.AbstractModel):
         return res
 
     def filtro_odoo(self, id):
-        return [('sinc_id', '=', id), ('type', '!=', 'contact')]
+        return [('sinc_id', '=', id), ('type', '!=', 'contact'), '|', ('active','=',True), ('active','=',False)]
 
     def obtener_bc_info(self, params):
         res = self.env['sinc_bigcommerce.api'].get_customer_addresses(params)
@@ -104,7 +104,7 @@ class SincResPartnerAddress(models.AbstractModel):
 
     def write_odoo(self, obj, dict):
         cliente = self.env['sinc_bigcommerce.res_partner'].establecer_cliente(dict['parent_id'])
-        dict['parent_id'] = cliente.id
+        dict['parent_id'] = cliente[0].id
         return obj.write(dict)
 
 class SincProductCategory(models.AbstractModel):
@@ -252,7 +252,7 @@ class SincProduct(models.AbstractModel):
         return res
 
     def filtro_odoo(self, id):
-        return [('sinc_id', '=', id)]
+        return [('sinc_id', '=', id), '|', ('active','=',True), ('active','=',False)]
 
     def obtener_bc_info(self, params):
         res = self.env['sinc_bigcommerce.api'].get_products(params)
