@@ -101,8 +101,9 @@ class SincBase(models.AbstractModel):
                         logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Crear) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo')
                         obj = self.env[self._name].create_odoo(dict)
                     else:
-                        logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Modificar) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo ID: ' + str(obj.id))
-                        self.env[self._name].write_odoo(obj, dict)
+                        for o in obj:
+                            logging.warn(str(contador) + ' -- ' + self.res_model() + ' (Modificar) BC ID: ' + str(dict['sinc_id']) + ' --> Odoo ID: ' + str(o.id))
+                            self.env[self._name].write_odoo(o, dict)
 
                 # Condición que revisa si termina el ciclo o si se hace una nueva llamada al api de bigcommerce para accesar 
                 # la siguiente página de información.
