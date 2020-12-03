@@ -362,6 +362,9 @@ class SincProduct(models.AbstractModel):
         return True
 
     def create_bc(self, dict, producto):
+
+        dict['price'] = dict['sale_price']
+
         if dict['category_id']:
             dict['categories'] = [dict['category_id'].sinc_id]
         else:
@@ -411,6 +414,9 @@ class SincProduct(models.AbstractModel):
 
     def write_bc(self, dict, producto):
         res = self.obtener_bc_info([{'id': producto.sinc_id}])
+
+        dict['price'] = dict['sale_price']
+
         if res['data'] != []:
             if dict['category_id']:
                 dict['categories'] = [dict['category_id'].sinc_id]
