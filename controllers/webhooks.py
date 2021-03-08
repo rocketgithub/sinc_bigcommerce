@@ -3,6 +3,7 @@
 from odoo import http
 from odoo.http import request, route
 import json
+import time
 import logging
 
 class Webhooks(http.Controller):
@@ -13,13 +14,23 @@ class Webhooks(http.Controller):
         producer = 'stores/' + request.env["res.config.settings"].sudo().obtener_store_hash()
         if args and args['producer'] and args['producer'] == producer and args['scope'] and args['data'] and args['data']['id']:
             #Customers
-            if args['scope'] == 'store/customer/created' or args['scope'] == 'store/customer/updated':
-                logging.warn('Webhook - Customers')
+            if args['scope'] == 'store/customer/created':
+                logging.warn('Webhook - Customers - created')
+                params = [{'id:in': args['data']['id']}]
+                request.env['sinc_bigcommerce.res_partner'].sudo().transferir_bc_odoo(params)
+            elif args['scope'] == 'store/customer/updated':
+                time.sleep(3)
+                logging.warn('Webhook - Customers - updated')
                 params = [{'id:in': args['data']['id']}]
                 request.env['sinc_bigcommerce.res_partner'].sudo().transferir_bc_odoo(params)
             #Address
-            elif args['scope'] == 'store/customer/address/created' or args['scope'] == 'store/customer/address/updated':
-                logging.warn('Webhook - Address')
+            elif args['scope'] == 'store/customer/address/created':
+                logging.warn('Webhook - Address - created')
+                params = [{'customer_id:in': args['data']['address']['customer_id']}, {'id:in': args['data']['id']}]
+                request.env['sinc_bigcommerce.res_partner_address'].sudo().transferir_bc_odoo(params)
+            elif args['scope'] == 'store/customer/address/updated':
+                time.sleep(3)
+                logging.warn('Webhook - Address - updated')
                 params = [{'customer_id:in': args['data']['address']['customer_id']}, {'id:in': args['data']['id']}]
                 request.env['sinc_bigcommerce.res_partner_address'].sudo().transferir_bc_odoo(params)
             #Orders
