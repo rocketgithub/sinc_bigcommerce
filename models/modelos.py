@@ -300,9 +300,9 @@ class SincProduct(models.AbstractModel):
             dict['marca_id'] = None
              
         imagen = False
-        if dict['image_1920']:
-            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
-            del dict['image_1920']
+#        if dict['image_1920']:
+#            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
+        del dict['image_1920']
 
         campos = []
         campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
@@ -336,9 +336,9 @@ class SincProduct(models.AbstractModel):
             dict['marca_id'] = None
 
         imagen = False
-        if dict['image_1920']:
-            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
-            del dict['image_1920']
+#        if dict['image_1920']:
+#            imagen = base64.b64encode(requests.get(dict['image_1920']).content)
+        del dict['image_1920']
 
         campos = []
         campos_personalizados = self.env['sinc_bigcommerce.campo_personalizado'].search([])
