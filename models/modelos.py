@@ -585,9 +585,9 @@ class SincOrders(models.AbstractModel):
             if not error:
                 venta.action_confirm()
                 venta._create_invoices()
-                for factura in venta.invoice_ids:
-                    factura.journal_id = 13
-                    factura.action_post()
+#                for factura in venta.invoice_ids:
+#                    factura.journal_id = 13
+#                    factura.action_post()
             else:
                 for n in nota:
                     venta.message_post(body=n)
